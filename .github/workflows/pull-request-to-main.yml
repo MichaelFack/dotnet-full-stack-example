@@ -24,7 +24,9 @@ jobs:
           paths=$(gh pr view --json files -q '.files[].path')
           echo $paths
           for path in $paths; do
-            [[ $path == frontend/* ]] && $(frontend-files-changed=true >> $GITHUB_OUTPUT)
+            if [[ $path == frontend/* ]]; then
+              echo frontend-files-changed=true >> $GITHUB_OUTPUT
+            fi
           done
   verify-frontend-code:
     runs-on: ubuntu-latest

@@ -8,6 +8,8 @@ outputs:
   success:
     description: "Whether merge was a success or not, boolean"
     value: ${{ steps.outputs.success }}
+env:
+  GH_TOKEN: ${{ github.token }}
 runs:
   using: "composite"
   steps:

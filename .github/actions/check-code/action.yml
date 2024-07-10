@@ -28,8 +28,10 @@ runs:
       dotnet-version: '8.0.302' # Matches local development environment
   - name: check code
     run: dotnet format ${{ inputs.project }} --verify-no-changes
+    shell: bash
   - name: build code
     run: dotnet build ${{ inputs.project }} --configuration Debug
+    shell: bash
   - name: run unit tests
     if: ${{ inputs.unit }}
     run: dotnet test ${{ inputs.project }} --filter TestCategory=Unit --no-build

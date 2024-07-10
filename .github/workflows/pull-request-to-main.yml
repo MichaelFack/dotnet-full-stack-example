@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/check-code
+      - uses: .github/actions/check-code
         with:
           project: frontend
           unit: true

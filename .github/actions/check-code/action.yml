@@ -1,7 +1,7 @@
-name: 'Run tests'
-description: 'Runs tests, filtered by group name; unit, integration or end-to-end tests.'
+name: 'Check code'
+description: 'Checks code and runs tests, filtered by group name; unit, integration or end-to-end tests.'
 inputs:
-  solution:
+  project:
     description: 'Which solution to run tests on.'
     required: true
   unit:
@@ -23,15 +23,22 @@ runs:
   using: "composite"
   steps:
   - uses: actions/checkout@v4
+  - uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: '8.0.302' # Matches local development environment
+  - name: check code
+    run: dotnet format ${{ inputs.project }} --verify-no-changes
+  - name: build code
+    run: dotnet build ${{ inputs.project }} --configuration Debug
   - name: run unit tests
     if: ${{ inputs.unit }}
-    run: dotnet test ${{ inputs.solution }} --filter TestCategory=Unit
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=Unit --no-build
     shell: bash
   - name: run integration tests
     if: ${{ inputs.integration }}
-    run: dotnet test ${{ inputs.solution }} --filter TestCategory=Integration
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=Integration --no-build
     shell: bash
   - name: run end-to-end tests
     if: ${{ inputs.e2e }}
-    run: dotnet test ${{ inputs.solution }} --filter TestCategory=E2E
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=E2E --no-build
     shell: bash

@@ -4,9 +4,12 @@ on:
   pull_request:
     branches: main
 jobs:
-  todo:
+  verify-frontend-code:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: echo "todo - verify the code by scanning, building and testing it"
+      - uses: ./actions/check-code
+        with:
+          project: frontend
+          unit: true
+          integration: true
+          e2e: false # We run these specifically on staging

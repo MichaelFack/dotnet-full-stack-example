@@ -1,0 +1,23 @@
+name: 'Merge pull request'
+description: 'Merges a pull request from a branch towards another, fast forwarding, if all required checks has passed'
+inputs:
+  pr-number:
+    description: 'Which PR to merge, by PR index/number'
+    required: true
+outputs:
+  success:
+    description: "Whether merge was a success or not, boolean"
+    value: ${{ steps.outputs.success }}
+runs:
+  using: "composite"
+  steps:
+  - name: merge pr
+    id: merge-pr
+    continue-on-error: true
+    run: gh pr merge ${{ inputs.pr-number }} --merge
+    shell: bash
+  - name: output success
+    id: outputs
+    outputs: success
+    run: echo 'success=${{ steps.merge-pr.outcome }}' >> $GITHUB_OUTPUT
+    shell: bash

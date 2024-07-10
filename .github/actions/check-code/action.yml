@@ -1,0 +1,44 @@
+name: 'Check code'
+description: 'Checks code and runs tests, filtered by group name; unit, integration or end-to-end tests.'
+inputs:
+  project:
+    description: 'Which solution to run tests on.'
+    required: true
+  unit:
+    description: 'Run unit tests?'
+    type: boolean
+    required: true
+    default: false
+  integration:
+    description: 'Run integration tests?'
+    type: boolean
+    required: true
+    default: false
+  e2e:
+    description: 'Run e2e tests?'
+    type: boolean
+    required: true
+    default: false
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/checkout@v4
+  - uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: '8.0.302' # Matches local development environment
+  - name: check code
+    run: dotnet format ${{ inputs.project }} --verify-no-changes
+  - name: build code
+    run: dotnet build ${{ inputs.project }} --configuration Debug
+  - name: run unit tests
+    if: ${{ inputs.unit }}
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=Unit --no-build
+    shell: bash
+  - name: run integration tests
+    if: ${{ inputs.integration }}
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=Integration --no-build
+    shell: bash
+  - name: run end-to-end tests
+    if: ${{ inputs.e2e }}
+    run: dotnet test ${{ inputs.project }} --filter TestCategory=E2E --no-build
+    shell: bash

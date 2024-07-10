@@ -1,0 +1,26 @@
+name: 'Create pull request'
+description: 'Creates a pull request from a branch towards another'
+inputs:
+  from:
+    description: 'Which branch PR is from/head'
+    required: true
+  to:
+    description: 'Which branch PR is to/base'
+    required: true
+outputs:
+  success:
+    description: "Whether creation was a success or not, boolean"
+    value: ${{ steps.outputs.success }}
+runs:
+  using: "composite"
+  steps:
+  - name: create pr
+    id: create-pr
+    continue-on-error: true
+    run: gh pr create --head ${{ inputs.from }} --base ${{ inputs.to }} --title 'Merge ${{ inputs.from }} into ${{ inputs.to }}' --fill
+    shell: bash
+  - name: output success
+    id: outputs
+    outputs: success
+    run: echo 'success=${{ steps.create-pr.outcome }}' >> $GITHUB_OUTPUT
+    shell: bash

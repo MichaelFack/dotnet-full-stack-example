@@ -4,6 +4,20 @@ on:
   pull_request:
     branches: main
 jobs:
+  detect-files-changed:
+    outputs:
+      frontend-files-changed: ${{ steps.get-files-changed.outputs.paths }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Files changed
+        id: get-files-changed
+        run: |
+          echo frontend-files-changed=false >> $GITHUB_OUTPUT
+          paths=$(gh pr view --json files -q '.files[].path')
+          echo paths
+          for path in $paths; do
+            [[ $path =~ ^(frontend)(\\[a-zA-Z1-9_-]*)+ ]] && frontend-files-changed=true >> $GITHUB_OUTPUT
+          done
   verify-frontend-code:
     runs-on: ubuntu-latest
     steps:

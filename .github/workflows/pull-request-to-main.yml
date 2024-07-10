@@ -11,6 +11,7 @@ jobs:
       frontend-files-changed: ${{ steps.get-files-changed.outputs.paths }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Files changed
         id: get-files-changed
         run: |

@@ -21,6 +21,7 @@ jobs:
   verify-frontend-code:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./actions/check-code
         with:
           project: frontend

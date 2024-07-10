@@ -1,0 +1,12 @@
+name: Pull request to main
+run-name: ${{ github.actor }} has created a pull request from ${{ github.head_ref }} to ${{ github.base_ref }}
+on:
+  pull_request:
+    branches: main
+jobs:
+  todo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "todo - verify the code by scanning, building and testing it"

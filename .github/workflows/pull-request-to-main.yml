@@ -11,7 +11,7 @@ permissions:
 jobs:
   detect-files-changed:
     outputs:
-      frontend-files-changed: ${{ steps.get-files-changed.outputs.paths }}
+      frontend-files-changed: ${{ steps.get-files-changed.outputs.frontend-files-changed }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +30,8 @@ jobs:
           done
   verify-frontend-code:
     runs-on: ubuntu-latest
+    needs: [detect-files-changed]
+    if: ${{ needs.detect-files-changed.outputs.frontend-files-changed }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/check-code

@@ -1,0 +1,24 @@
+name: Pull request to production
+run-name: ${{ github.actor }} has created a pull request from ${{ github.head_ref }} to ${{ github.base_ref }}
+on:
+  pull_request:
+    branches: prod
+jobs:
+  check-from-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: ${{ github.head_ref }} != 'staging'
+  verify-frontend-code:
+    concurrency:
+      e2e-tests
+    runs-on: ubuntu-latest
+    needs: [check-from-staging]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/check-code
+        with:
+          project: frontend
+          unit: true
+          integration: true
+          e2e: true

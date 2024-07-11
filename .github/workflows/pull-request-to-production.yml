@@ -7,8 +7,9 @@ jobs:
   check-from-staging:
     runs-on: ubuntu-latest
     steps:
-      - run: exit 1
-        if: ${{ github.head_ref }} != 'staging'
+      - name: check from staging
+        if: ${{ github.head_ref != 'staging' }}
+        run: exit 1
   verify-frontend-code:
     concurrency:
       e2e-tests

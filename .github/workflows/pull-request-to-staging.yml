@@ -7,8 +7,9 @@ jobs:
   check-from-main:
     runs-on: ubuntu-latest
     steps:
-      - run: exit 1
-        if: ${{ github.head_ref }} != 'main'
+      - name: check from main
+        if: ${{ github.head_ref != 'main' }}
+        run: exit 1
   verify-frontend-code:
     runs-on: ubuntu-latest
     needs: [check-from-main]

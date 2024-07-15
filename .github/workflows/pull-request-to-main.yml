@@ -8,10 +8,12 @@ env:
 permissions:
   pull-requests: read
   contents: read
+  id-token: write
 jobs:
   detect-files-changed:
     outputs:
       frontend-files-changed: ${{ steps.get-files-changed.outputs.frontend-files-changed }}
+      iac-files-changed: ${{ steps.get-files-changed.outputs.iac-files-changed }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,21 +23,44 @@ jobs:
         id: get-files-changed
         run: |
           echo frontend-files-changed=false >> $GITHUB_OUTPUT
+          echo iac-files-changed=false >> $GITHUB_OUTPUT
           paths=$(gh pr view --json files -q '.files[].path')
           for path in $paths; do
             if [[ $path == frontend/* ]]; then
               echo frontend-files-changed=true >> $GITHUB_OUTPUT
             fi
+            if [[ $path == iac/* ]]; then
+              echo iac-files-changed=true >> $GITHUB_OUTPUT
+            fi
           done
   verify-frontend-code:
     runs-on: ubuntu-latest
+    environment: development
     needs: [detect-files-changed]
     if: ${{ needs.detect-files-changed.outputs.frontend-files-changed }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.302' # Matches local development environment
       - uses: ./.github/actions/check-code
         with:
           project: frontend
           unit: true
           integration: true
           e2e: false # We run these specifically on staging
+  verify-iac:
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: [detect-files-changed]
+    if: ${{ needs.detect-files-changed.outputs.iac-files-changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.IAM_ASSUMABLE_ROLE }}
+      - uses: hashicorp/setup-terraform@v3
+      - uses: ./.github/actions/check-terraform
+        with:
+          project: ./iac/terraform

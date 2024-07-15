@@ -3,6 +3,11 @@ run-name: ${{ github.actor }} has created a pull request from ${{ github.head_re
 on:
   pull_request:
     branches: prod
+env:
+  GH_TOKEN: ${{ github.token }}
+permissions:
+  contents: read
+  id-token: write
 jobs:
   check-from-staging:
     runs-on: ubuntu-latest
@@ -12,14 +17,31 @@ jobs:
         run: exit 1
   verify-frontend-code:
     concurrency:
-      e2e-tests
+      group: e2e-tests
     runs-on: ubuntu-latest
+    environment: staging
     needs: [check-from-staging]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.302' # Matches local development environment
       - uses: ./.github/actions/check-code
         with:
           project: frontend
           unit: true
           integration: true
           e2e: true
+  verify-iac:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.IAM_ASSUMABLE_ROLE }}
+      - uses: hashicorp/setup-terraform@v3
+      - uses: ./.github/actions/check-terraform
+        with:
+          project: ./iac/terraform

@@ -1,0 +1,4 @@
+region         = "eu-central-1"
+bucket         = "tfstate-bucket-851725296520"
+key            = "staging.tfstate"
+dynamodb_table = "tfstate-lock-table"

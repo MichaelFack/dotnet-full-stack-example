@@ -1,0 +1,32 @@
+name: Deploy to staging
+run-name: ${{ github.actor }} has merged to ${{ github.ref }}
+on:
+  push:
+    branches:
+      staging
+permissions:
+  pull-requests: read
+  contents: read
+jobs:
+  deploy-to-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      # - uses: actions/setup-dotnet@v4 # TODO: add compilation and publishing of dotnet code.
+      #   with:
+      #     dotnet-version: '8.0.302' # Matches local development environment
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.IAM_ASSUMABLE_ROLE }}
+      - uses: hashicorp/setup-terraform@v3
+      - name: run terraform
+        shell: bash
+        working-directory: iac/terraform
+        run: |
+          terraform fmt -recursive -check
+          terraform init -input=false -backend-config="configs/staging.s3.tfbackend"
+          terraform validate
+          terraform plan -input=false -out=tfplan -var-file="configs/staging.vars"
+          terraform apply -input=false tfplan

@@ -1,0 +1,25 @@
+name: 'Check terraform'
+description: 'Checks terraform and runs validation and plan'
+inputs:
+  project:
+    description: 'Which dir to run checks within.'
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: check terraform
+    run: terraform fmt -recursive -check
+    working-directory: ${{ inputs.project }}
+    shell: bash
+  - name: init terraform
+    run: terraform init -input=false -backend-config="configs/staging.s3.tfbackend"
+    working-directory: ${{ inputs.project }}
+    shell: bash
+  - name: validate terraform
+    run: terraform validate
+    working-directory: ${{ inputs.project }}
+    shell: bash
+  - name: plan terraform (for manual review)
+    run: terraform plan -input=false -var-file="configs/staging.vars"
+    working-directory: ${{ inputs.project }}
+    shell: bash

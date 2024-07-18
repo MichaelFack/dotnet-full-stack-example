@@ -12,6 +12,7 @@ permissions:
 jobs:
   detect-files-changed:
     outputs:
+      backend-files-changed: ${{ steps.get-files-changed.outputs.backend-files-changed }}
       frontend-files-changed: ${{ steps.get-files-changed.outputs.frontend-files-changed }}
       iac-files-changed: ${{ steps.get-files-changed.outputs.iac-files-changed }}
     runs-on: ubuntu-latest
@@ -22,10 +23,16 @@ jobs:
       - name: Files changed
         id: get-files-changed
         run: |
+          echo backend-files-changed=false >> $GITHUB_OUTPUT
           echo frontend-files-changed=false >> $GITHUB_OUTPUT
           echo iac-files-changed=false >> $GITHUB_OUTPUT
+
           paths=$(gh pr view --json files -q '.files[].path')
+
           for path in $paths; do
+            if [[ $path == backend/* ]]; then
+              echo backend-files-changed=true >> $GITHUB_OUTPUT
+            fi
             if [[ $path == frontend/* ]]; then
               echo frontend-files-changed=true >> $GITHUB_OUTPUT
             fi
@@ -33,6 +40,19 @@ jobs:
               echo iac-files-changed=true >> $GITHUB_OUTPUT
             fi
           done
+  verify-backend-code:
+    runs-on: ubuntu-latest
+    environment: development
+    needs: [detect-files-changed]
+    if: ${{ needs.detect-files-changed.outputs.backend-files-changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.302' # Matches local development environment
+      - uses: ./.github/actions/check-dotnet-code
+        with:
+          project: backend
   verify-frontend-code:
     runs-on: ubuntu-latest
     environment: development
@@ -40,15 +60,9 @@ jobs:
     if: ${{ needs.detect-files-changed.outputs.frontend-files-changed }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.302' # Matches local development environment
-      - uses: ./.github/actions/check-code
+      - uses: ./.github/actions/check-typescript-code
         with:
           project: frontend
-          unit: true
-          integration: true
-          e2e: false # We run these specifically on staging
   verify-iac:
     runs-on: ubuntu-latest
     environment: staging

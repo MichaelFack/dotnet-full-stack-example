@@ -18,9 +18,15 @@ resource "random_string" "docker_image_tag" {
   }
 }
 
-data "external" "name" {
-  program    = ["bash", "${path.module}/scripts/docker.sh", var.region, var.aws_account_id, "${path.module}", aws_ecr_repository.frontend_ecr_repository.name, random_string.docker_image_tag.result]
-  depends_on = [aws_ecr_repository.frontend_ecr_repository]
+resource "terraform_data" "push_to_docker" {
+  # Changes to tag infers change to image
+  triggers_replace = [
+    random_string.docker_image_tag
+  ]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/docker.sh ${var.region} ${var.aws_account_id} ${path.module} ${aws_ecr_repository.frontend_ecr_repository.name} ${random_string.docker_image_tag.result}"
+  }
 }
 
 # data "aws_subnet" "aws_vpc_subnet" {

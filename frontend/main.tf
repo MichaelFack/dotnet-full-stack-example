@@ -24,8 +24,8 @@ resource "terraform_data" "push_to_docker" {
     random_string.docker_image_tag
   ]
 
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/docker.sh ${var.region} ${var.aws_account_id} ${path.module} ${aws_ecr_repository.frontend_ecr_repository.name} ${random_string.docker_image_tag.result}"
+  provisioner "local-exec" { 
+    command = "aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${var.aws_account_id}.dkr.ecr.${var.region}.amazonaws.com && docker build -t ${var.aws_account_id}.dkr.ecr.${var.region}.amazonaws.com/${aws_ecr_repository.frontend_ecr_repository.name}:${random_string.docker_image_tag.result} ${path.module} && docker push ${var.aws_account_id}.dkr.ecr.${var.region}.amazonaws.com/${aws_ecr_repository.frontend_ecr_repository.name}:${random_string.docker_image_tag.result}"
   }
 }
 

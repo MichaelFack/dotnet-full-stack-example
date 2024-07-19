@@ -12,6 +12,10 @@ resource "aws_ecr_repository" "frontend_ecr_repository" {
 resource "random_string" "docker_image_tag" {
   length  = 16
   special = false
+  keepers = {
+    docker_image_content_hash  = sha1(join("|", [for f in fileset("${path.module}/src", "*") : filesha1("${path.module}/src/${f}")], [for f in fileset("${path.module}/public", "*") : filesha1("${path.module}/public/${f}")]))
+    docker_image_packages_hash = filesha1("${path.module}/package-lock.json")
+  }
 }
 
 data "external" "name" {

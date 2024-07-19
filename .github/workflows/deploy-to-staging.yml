@@ -23,7 +23,7 @@ jobs:
           project: frontend
       - name: 'build frontend'
         shell: bash
-        working-directory: iac/terraform
+        working-directory: frontend
         run: |
           npm run build
       - uses: hashicorp/setup-terraform@v3

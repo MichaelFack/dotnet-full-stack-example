@@ -7,19 +7,25 @@ on:
 permissions:
   pull-requests: read
   contents: read
+  id-token: write
 jobs:
   deploy-to-staging:
     runs-on: ubuntu-latest
     environment: staging
     steps:
       - uses: actions/checkout@v4
-      # - uses: actions/setup-dotnet@v4 # TODO: add compilation and publishing of dotnet code.
-      #   with:
-      #     dotnet-version: '8.0.302' # Matches local development environment
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ secrets.IAM_ASSUMABLE_ROLE }}
+      - uses: ./.github/actions/check-typescript-code
+        with:
+          project: frontend
+      - name: 'build frontend'
+        shell: bash
+        working-directory: iac/terraform
+        run: |
+          npm run build
       - uses: hashicorp/setup-terraform@v3
       - name: run terraform
         shell: bash

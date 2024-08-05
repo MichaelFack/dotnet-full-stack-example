@@ -10,6 +10,10 @@ variable "vpc_security_group_ids" {
   type = list(string)
 }
 
+variable "vpc_subnets" {
+  type = list(string)
+}
+
 variable "region" {
   type = string
 }

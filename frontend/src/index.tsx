@@ -1,15 +1,39 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import FirstQuestionAnnotated from "./pages/philosophy/firstQuestionAnnotated";
+import Main from "./pages/main";
+import PhilosophyMain from "./pages/philosophy/main";
+import Error from "./pages/error";
+import FirstQuestion from "./pages/philosophy/firstQuestion";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Main />,
+  },
+  {
+    path: "/philosophy",
+    element: <PhilosophyMain />
+  },
+  {
+    path: "/philosophy/first-question",
+    element: <FirstQuestion />
+  },
+  {
+    path: "/philosophy/first-question-annotated",
+    element: <FirstQuestionAnnotated />
+  },
+]);
+
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} fallbackElement={Error()} />
   </React.StrictMode>,
 );
 

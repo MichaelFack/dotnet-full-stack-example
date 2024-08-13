@@ -5,6 +5,7 @@ module "frontend" {
   region                 = data.aws_region.current.name
   vpc_id                 = aws_default_vpc.default_vpc.id
   vpc_security_group_ids = [aws_default_vpc.default_vpc.default_security_group_id]
+  vpc_subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 
   tags = local.tags
 }

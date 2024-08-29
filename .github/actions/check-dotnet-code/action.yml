@@ -22,21 +22,28 @@ inputs:
 runs:
   using: "composite"
   steps:
+  - name: create local package source "locals"
+    run: |
+      if [ ! -d "${{ inputs.project }}/locals" ]; then
+        mkdir "${{ inputs.project }}/locals"
+      fi
+    shell: bash
   - name: check code
-    run: dotnet format ${{ inputs.project }} --verify-no-changes
+    run: dotnet format ${{ inputs.project }} --verify-no-changes --no-restore
     shell: bash
   - name: build code
-    run: dotnet build ${{ inputs.project }} --configuration Debug
+    run: |
+      dotnet build ${{ inputs.project }} --configuration Debug
     shell: bash
   - name: run unit tests
     if: ${{ inputs.unit }}
-    run: dotnet test ${{ inputs.project }} --filter TestCategory=Unit --no-build
+    run: dotnet test ${{ inputs.project }} --filter Category=Unit --no-build
     shell: bash
   - name: run integration tests
     if: ${{ inputs.integration }}
-    run: dotnet test ${{ inputs.project }} --filter TestCategory=Integration --no-build
+    run: dotnet test ${{ inputs.project }} --filter Category=Integration --no-build
     shell: bash
   - name: run end-to-end tests
     if: ${{ inputs.e2e }}
-    run: dotnet test ${{ inputs.project }} --filter TestCategory=E2E --no-build
+    run: dotnet test ${{ inputs.project }} --filter Category=EndToEnd --no-build
     shell: bash

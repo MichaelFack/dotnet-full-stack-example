@@ -86,7 +86,7 @@ resource "aws_route53_zone" "frontend_zone" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name = aws_route53_zone.frontend_zone.name
+  domain_name       = aws_route53_zone.frontend_zone.name
   validation_method = "DNS"
 
   lifecycle {

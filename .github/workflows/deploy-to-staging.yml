@@ -24,8 +24,13 @@ jobs:
       - name: 'build frontend'
         shell: bash
         working-directory: frontend
-        run: |
-          npm run build
+        run: npm run build
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.302' # Matches local development environment
+      - name: 'build backend'
+        shell: bash
+        run: dotnet build backend --configuration Release
       - uses: hashicorp/setup-terraform@v3
       - name: run terraform
         shell: bash
